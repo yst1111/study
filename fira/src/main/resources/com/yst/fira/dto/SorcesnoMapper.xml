@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yst.fira.dto.SorcesnoMapper">
+
+    <resultMap id="BaseResultMap" type="com.yst.entity.dto.SorcesnoDto">
+            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="sorcesno" column="sorcesNO" jdbcType="VARCHAR"/>
+            <result property="sorcemsg" column="sorceMsg" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,sorcesNO,sorceMsg
+    </sql>
+    <update id="updateit">
+        update sorcesNO
+        set sorceMsg = #{student.likes}
+        where id = #{student.id}
+    </update>
+
+    <delete id="deleteSorces">
+        delete from sorces where id = #{params.id}
+    </delete>
+
+
+</mapper>
