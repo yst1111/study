@@ -1,7 +1,10 @@
 package com.yst.fira.repo.user.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.sun.xml.internal.bind.v2.TODO;
 import com.yst.entity.pojo.Student;
 import com.yst.fira.dto.MybatisTest;
 import com.yst.fira.repo.user.IMybatisTestRespository;
@@ -44,6 +47,7 @@ public class MybatisTestRespository implements IMybatisTestRespository {
     //wrapper.eq() 两个.eq() 是AND关系 SELECT COUNT( 1 ) FROM student WHERE (id = ? AND name = ?)
     @Override
     public String selectCount(Map<String, Object> map) {
+        //TODO yst
         QueryWrapper<Student> wrapper = new QueryWrapper<>();
         for (String key : map.keySet()) {
             wrapper.eq(key,map.get(key));
@@ -137,19 +141,32 @@ public class MybatisTestRespository implements IMybatisTestRespository {
 
         //UpdateWrapper 用于"改" 1.实体类set 2.updateWrapper.eq()传入条件 实体类必要用,但同时可以用.set()或者.setsql()
         //实体类最好不要用基本数据类型,而用包装类型
-        UpdateWrapper<Student> updateWrapper = new UpdateWrapper<>();
-        Student student = new Student();
-        student.setName("zzs");
-//        student.setAge(19);
-        student.setLikes("game");
+//        UpdateWrapper<Student> updateWrapper = new UpdateWrapper<>();
+//        Student student = new Student();
+//        student.setName("zzs");
+//        student.setLikes("game");
+//
+//        updateWrapper.set("country","中国");
+//        updateWrapper.like("name","z"); //UPDATE student SET name=?, likes=?, country=?,age=?, age = 19 WHERE (name LIKE ? AND id = ?)
+//        updateWrapper.set("age","18");
+//        updateWrapper.eq("id","1");
+//        updateWrapper.setSql(" age = 19");
+//        mybatisTest.update(student,updateWrapper);
 
-        updateWrapper.set("country","中国");
-        updateWrapper.like("name","z"); //UPDATE student SET name=?, likes=?, country=?,age=?, age = 19 WHERE (name LIKE ? AND id = ?)
-        updateWrapper.set("age","18");
-        updateWrapper.eq("id","1");
-        updateWrapper.setSql(" age = 19");
-        mybatisTest.update(student,updateWrapper);
+        //Lambda表达式 LambdaQueryWrapper
+        LambdaQueryWrapper<Student> lambda = new QueryWrapper<Student>().lambda();
+        lambda.eq(Student::getId,1);
+
+//        lambda.ge(Student::getAge,"12")
+//                .le(Student::getAge,"15")
+//                .like(Student::getName,"z")
+//                .orderByAsc(Student::getId);
+
+        List<Student> students = mybatisTest.selectList(lambda);
+
 
     }
+
+
 
 }
