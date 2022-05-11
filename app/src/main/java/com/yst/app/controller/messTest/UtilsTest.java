@@ -1,10 +1,11 @@
 package com.yst.app.controller.messTest;
 
+import com.baomidou.mybatisplus.extension.api.R;
 import org.testng.annotations.Test;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -67,7 +68,21 @@ public class UtilsTest {
         double floor = Math.floor(12.5);
         double ceil = Math.ceil(12.5);
         double rint = Math.rint(12.54);
-        System.out.println("ceil "+ ceil+" floor"+floor+" rint "+rint);
+        long round = Math.round(-1.3);
+        int max = Math.max(1, 3);
+        int min = Math.min(-1, -8);
+        double exp = Math.exp(1);//e的1次方
+        double sqrt = Math.sqrt(2);//2的算术平方根
+        double sin = Math.sin(90);
+
+        double random = Math.random(); //
+        System.out.println("ceil "+ ceil+" floor"+floor+" rint "+rint+" round "+round);
+        System.out.println("max: "+max);
+        System.out.println("min: "+min);
+        System.out.println("exp: "+exp);
+        System.out.println("sqrt: "+sqrt);
+        System.out.println("sin: "+sin);
+        System.out.println("random "+random);
 
     }
 
@@ -103,6 +118,144 @@ public class UtilsTest {
         //Integer.parseInt() 和 Integer.valueOf() 效果相同
         int parse = Integer.parseInt("12");
         System.out.println("parse: "+parse);
+
+    }
+
+    @Test
+    //格式化数字
+    void numberFormat(){
+        //DecimalFormat #数字占位,0用0占位,.小数点,,逗号分隔,%显示百分值 \u2030表示千分值
+        DecimalFormat format = new DecimalFormat("0000.##\u2030");
+        String num1 = format.format(123.12);
+        System.out.println("123.12: "+num1);
+        //科学计数法
+        DecimalFormat format1 = new DecimalFormat("0.##E0");
+        String num2 = format1.format(12345);
+        System.out.println("num2: "+num2);
+        //货币 人民币
+        DecimalFormat format2 = new DecimalFormat("\u00A4#0.##");
+        String num3 = format2.format(0.3333);
+        System.out.println("num3 "+num3);
+        //$
+        DecimalFormat format3 = new DecimalFormat(Currency.getInstance(Locale.JAPAN)+"$00.00");
+        String money = format3.format(100000);
+        System.out.println("money "+money);
+
+    }
+
+    @Test
+    //Random 随机生成(各种数据类型的数字)
+    void random(){
+        Random random = new Random();
+        //随机生成 true,false
+        boolean ranBoolean = random.nextBoolean();
+        System.out.println(ranBoolean);
+
+        System.out.println(random.nextDouble()*5);
+        System.out.println(random.nextLong());//随机生成Long
+        System.out.println(random.nextInt(101));//随机int 0~101-1
+        System.out.println(random.nextDouble());
+
+        Random random1 = new Random();
+        System.out.println(random1.nextInt(11));
+
+
+    }
+
+    @Test
+    //List
+    void List(){
+        String[] arr = {"1","2","san","四"};
+        List<String> list = Arrays.asList(arr);
+        ArrayList<String> list0 = new ArrayList<>(list);//用这种方式,使得Arrays.asList来的list可以add()
+        ArrayList<String> arrList = new ArrayList<>();
+
+        //list.isEmpty()
+        boolean empty = list.isEmpty();
+        System.out.println(empty);
+
+        //add
+        String a = "1";
+        arrList.add(a); //new出来的ArrayList可以扩容,而Array.asList来的ArrayList不可扩容
+        arrList.add(0,"0");
+        list0.add("2");
+        System.out.println(arrList);
+        System.out.println(list0);
+
+        //iterator() 返回迭代器,按顺序
+        Iterator<String> iterator = list0.iterator();
+        while (iterator.hasNext()) {
+            System.out.println("it --"+iterator.next());
+        }
+
+        ListIterator<String> listIterator = list0.listIterator(1);
+        while (listIterator.hasNext()) {
+            System.out.println("itList --"+listIterator.next());
+        }
+
+        //lastIndexOf() 最后一次出现的索引
+        int last1 = list0.lastIndexOf("1");
+        int last4 = list0.lastIndexOf("4");
+        System.out.println(last1+" "+last4);
+
+        //list的hashCode() 来判断两个list是否相同
+        int list0Code = list0.hashCode();
+        int listCode = list.hashCode();
+
+        System.out.println("if hashcode equal ? "+(list0Code == listCode));
+
+        //清空list
+        System.out.println("begin "+list0);
+//        list0.clear();
+        System.out.println("after "+list0);
+
+        //contains() 判断是否包含 某元素
+        System.out.println("contains 1 ? "+list0.contains("1"));
+        System.out.println("contains 8 ? "+list0.contains("8"));
+
+        //containsAll() 一个list包含另一个list ?
+        System.out.println("list0"+list0);
+        System.out.println("list"+list);
+        System.out.println("list0 containsAll list ? "+list0.containsAll(list));
+
+        //equals() 与比较hashCode() 相同
+        System.out.println("list == list ? "+list.equals(list));
+        System.out.println("list == list0 ? "+list.equals(list0));
+
+        //get()
+        System.out.println("list.get(0) "+list.get(0));
+
+        //set()
+        System.out.println(list0.set(1, "21"));
+        System.out.println(list0);
+
+        //size()
+        System.out.println(list0.size());
+
+        //subList()截取两个index之间的元素,组成新list
+        List<String> sublist = list0.subList(1, 2);
+        System.out.println(sublist);
+
+        //toArray
+        Object[] objects = list0.toArray();
+        System.out.println(objects);
+        for (Object object : objects) {
+            System.out.println(object);
+        }
+            //用来将object[] 转化为 String[]
+        String[] array = list0.toArray(new String[1]);
+        System.out.println(array);
+        System.out.println("--------------------");
+        System.out.println("toArray");
+        for (String s : array) {
+            System.out.println(s);
+        }
+
+    }
+
+    @Test
+    //Map
+    void MapTest(){
 
     }
 
