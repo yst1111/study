@@ -256,6 +256,64 @@ public class UtilsTest {
     @Test
     //Map
     void MapTest(){
+        // 一个<String,Object>类型的 HashMap value可以存各种数据类型
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("a",1);
+        map.put("b","2");
+        System.out.println(map);
+
+        //clear()
+        System.out.println("---clear---");
+//        map.clear();
+        System.out.println(map);
+        System.out.println("------");
+
+        //compute() 将一个element插入map,map的key与element比较,新value存在则返回新v,新v为空则删除map中这一组
+        //数组中元素的重复性
+        Integer[] intArr = {1,2,3,1,4};
+        String[] stringArr = {"1","2","3","1","4"};
+        Map<Integer, Integer> mapInteger = new HashMap<>();
+        Map<String, Integer> mapString = new HashMap<>();
+        Arrays.asList(stringArr).forEach(element ->{
+            mapString.compute(element,(k,v) -> {
+                //定义新value如何返回
+                if(v == null){
+                    return 1;
+                }else {
+                    return v+1;
+                }
+            });
+        });
+
+        System.out.println("----key is stringArr, value is num----");
+        mapString.forEach((k,v) -> System.out.println(k+" "+v));
+
+        //删除某元素
+        Map<String,String> mapForBase = new HashMap<>();
+        mapForBase.put("1","A");
+        mapForBase.put("2","B");
+        mapForBase.put("5","C");
+        mapForBase.put("6","D");
+        Arrays.asList(stringArr).forEach(ele -> {
+            mapForBase.compute(ele,(k,v) ->{
+                return null;
+            });
+        });
+        System.out.println("----remove what stringArr have ---");
+        mapForBase.forEach((k,v)-> System.out.println(k+" "+v));
+
+        System.out.println("----remove '5'---");
+        mapForBase.compute("5",(k,v) ->{
+            return null;
+        });
+        mapForBase.forEach((k,v)-> System.out.println(k+" "+v));
+
+        //List去重
+        System.out.println("---- listForDedup ---");
+        ArrayList<String> listForDedup = new ArrayList<>();
+        listForDedup.add("1");
+        listForDedup.add("2");
+        listForDedup.add("1");
 
     }
 
