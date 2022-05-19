@@ -42,13 +42,14 @@ public class DataStructure {
         }
     }
 
+    //stack
     static void showpush(Stack<Integer> st,int a){
         st.push(new Integer(a));
         System.out.println("push "+a);
         System.out.println("stack "+st);
         System.out.println();
     }
-
+    //stack
     static void showpop(Stack<Integer> st) {
         System.out.print("pop -> ");
         Integer a = (Integer) st.pop();
@@ -96,8 +97,11 @@ public class DataStructure {
     }
 
     @Test
-    //栈
-    void Stack(){
+    //集合 Collection
+    //Collection的子接口 List和Set
+    //List 有序可重复  Set无序不可重复(SortedSet 有序集合)
+    //Map key和value的映射
+    void Collection(){
 
     }
 

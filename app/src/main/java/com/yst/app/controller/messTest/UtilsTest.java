@@ -1,17 +1,12 @@
 package com.yst.app.controller.messTest;
 
-import com.baomidou.mybatisplus.extension.api.R;
+
 import org.testng.annotations.Test;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
 
 /**
  * @creator: ly-yangst
@@ -415,5 +410,210 @@ public class UtilsTest {
 
     }
 
+    @Test
+    void Set(){
+        //无序不重复
+        HashSet<java.lang.String> stringSet = new HashSet<>();
+        //add()
+        stringSet.add("1");
+        stringSet.add("1");
+        stringSet.add("二");
+        stringSet.add("三");
+        System.out.println("--- add ---");
+        System.out.println("stringSet: "+stringSet);
+        System.out.println();
+
+        //可以通过addAll实现 set和get的转换
+        List<java.lang.String> listForAdd = new ArrayList<>();
+        listForAdd.add("1");
+        listForAdd.add("四");
+        listForAdd.add("五");
+        listForAdd.addAll(stringSet);
+        System.out.println("--- set -> list ---");
+        System.out.println("listForAdd : "+listForAdd);
+        System.out.println();
+
+        //addAll()  可以加set
+        stringSet.addAll(listForAdd);
+        System.out.println("--- addAll ---");
+        System.out.println("stringSet -- addAll : "+stringSet);
+        System.out.println();
+
+        //contains
+        System.out.println("--- contains ---");
+        System.out.println("contains 1 ? "+stringSet.contains("1"));
+        System.out.println();
+
+        //containsAll
+        System.out.println("--- containsAll ---");
+        List<String> listForContainsAll = new ArrayList<>();
+        listForContainsAll.add("1");
+        listForContainsAll.add("二");
+        listForContainsAll.add("2");
+        System.out.println("contains list ? "+stringSet.containsAll(listForContainsAll));
+        System.out.println();
+
+        //equals
+        System.out.println("--- equals ---");
+        System.out.println("equals ? "+stringSet.equals(stringSet));
+        System.out.println();
+
+        //hashCode
+        System.out.println("--- hashCode ---");
+        System.out.println("stringSet  hashCode "+stringSet.hashCode());
+        System.out.println();
+
+        //isEmpty
+        System.out.println("--- isEmpty ---");
+        System.out.println("stringSet  isEmpty ? "+stringSet.isEmpty());
+        System.out.println();
+
+        //iterator
+        System.out.println("--- iterator ---");
+        Iterator<java.lang.String> iterator = stringSet.iterator();
+        System.out.println("stringSet  iterator  " + iterator);
+        System.out.println("stringSet  next  " + iterator.next());
+        System.out.println("stringSet  next  " + iterator.next());
+        System.out.println();
+
+        //remove
+        System.out.println("--- remove ---");
+        System.out.println("stringSet  remove 二 "+stringSet.remove("二"));
+        System.out.println("stringSet  after remove "+stringSet);
+        System.out.println();
+
+        //removeAll
+        System.out.println("--- removeAll ---");
+        List<String> listForRemoveAll = new ArrayList<>();
+        listForRemoveAll.add("三");
+        listForRemoveAll.add("四");
+        listForRemoveAll.add("3");
+        System.out.println("stringSet  removeAll list "+stringSet.removeAll(listForRemoveAll));
+        System.out.println("stringSet  after removeAll "+stringSet);
+        System.out.println();
+
+        //retainAll 仅保存 ()集合中已存在的
+        stringSet.add("2");
+        stringSet.add("3");
+        stringSet.add("四");
+        System.out.println("--- retainAll ---");
+        List<java.lang.String> listForRetainAll = new ArrayList<>();
+        listForRetainAll.add("1");
+        listForRetainAll.add("2");
+        System.out.println("stringSet  retainAll  "+stringSet.retainAll(listForRetainAll));
+        System.out.println("stringSet after retainAll  "+stringSet);
+        System.out.println();
+
+        //size
+        stringSet.add("2");
+        stringSet.add("3");
+        stringSet.add("四");
+        System.out.println("--- size ---");
+        System.out.println("stringSet size  "+stringSet.size());
+        System.out.println();
+
+        //spliterator()
+        System.out.println("--- spliterator ---");
+        Spliterator<java.lang.String> spliterator = stringSet.spliterator();
+        System.out.println("stringSet spliterator  "+spliterator);
+        System.out.println();
+
+        //toArray
+        System.out.println("--- toArray ---");
+        Object[] toArray = stringSet.toArray();
+        for (Object o : toArray) {
+            System.out.println(o);
+        }
+        System.out.println("stringSet toArray  "+toArray);
+        System.out.println();
+
+        //toArray(T[] a)  toArray转换为指定类型的Array
+        System.out.println("--- toArray(T[] a) ---");
+        String[] arr = new String[0];
+        String[] toArrayT = stringSet.toArray(arr);
+        for (Object o : toArrayT) {
+            System.out.println(o);
+        }
+        System.out.println("stringSet toArray  "+toArray);
+        System.out.println();
+
+    }
+
+    @Test
+    void UUID(){
+        //randomUUID
+        System.out.println("--- randomUUID ---");
+        UUID uuid = UUID.randomUUID();
+        System.out.println("uuid "+uuid);
+        System.out.println();
+
+        //compareTo 比较
+        System.out.println("--- compareTo ---");
+        UUID uuid1 = UUID.randomUUID();
+        System.out.println("uuid1 "+uuid1);
+        System.out.println("compareTo "+uuid.compareTo(uuid1));
+        System.out.println();
+
+    }
+
+    @Test
+    void Arrays(){
+
+        //创建Arr
+        //占了位的arr的元素为 null
+        String[] arr0 = new String[3];
+        String[] arr = {"1","2","三"};
+        System.out.println("--- new Arrays ---");
+        System.out.println("arr0");
+        for (String s : arr0) {
+            System.out.println(s);
+        }
+        System.out.println("arr");
+        for (String s : arr) {
+            System.out.println(s);
+        }
+        System.out.println("arr0 "+arr0);
+        System.out.println("arr "+arr);
+        System.out.println();
+
+        //asList
+        System.out.println("--- asList ---");
+        List<String> asList = Arrays.asList(arr);
+        System.out.println(asList);
+        System.out.println();
+
+        //binarySearch
+        System.out.println("--- binarySearch ---");
+        byte[] bytes = new byte[1];
+        byte key = 1;
+        int i = Arrays.binarySearch(bytes, key);
+        System.out.println();
+        System.out.println();
+
+    }
+
+    @Test
+    void LinkedList(){
+
+        LinkedList<String> linkedList = new LinkedList<>();
+        linkedList.add("1");
+        linkedList.add("2");
+        linkedList.add("3");
+
+        //element 检索但不删除此列表的头
+        System.out.println(" --- element --- ");
+        String element = linkedList.element();
+        System.out.println(element);
+        System.out.println();
+
+        //get
+        System.out.println(" --- get --- ");
+        String get2 = linkedList.get(2);
+        System.out.println(get2);
+        System.out.println();
+
+        //
+
+    }
 
 }
