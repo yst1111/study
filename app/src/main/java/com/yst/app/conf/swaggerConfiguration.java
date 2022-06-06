@@ -1,6 +1,8 @@
 package com.yst.app.conf;
 
 
+import com.yst.app.AppApplication;
+import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -19,6 +21,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class swaggerConfiguration {
     @Bean
     public Docket webApiConfig(){
+        Logger logg = Logger.getLogger(AppApplication.class);
+        //日志
+        if (logg.isInfoEnabled()) {
+            logg.info("------  swagger start success！  ------");
+        }
+
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("yst")
                 .apiInfo(webApiInfo())

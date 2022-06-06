@@ -1,7 +1,7 @@
 package com.yst.app.controller.messTest;
 
 import com.yst.entity.pojo.Student;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.*;
 import java.util.stream.Collector;

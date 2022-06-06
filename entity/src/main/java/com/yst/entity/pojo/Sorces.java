@@ -1,6 +1,8 @@
 package com.yst.entity.pojo;
 
 
+import lombok.Data;
+
 public class Sorces {
 
   private String id;

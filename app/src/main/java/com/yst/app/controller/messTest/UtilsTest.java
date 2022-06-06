@@ -1,7 +1,9 @@
 package com.yst.app.controller.messTest;
 
 
+import org.hibernate.validator.internal.util.StringHelper;
 import org.testng.annotations.Test;
+
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -45,8 +47,24 @@ public class UtilsTest {
         System.out.println(format);
     }
 
+    private static final String PROPERTIES = "pro";
     @Test
     void systemTest() {
+        Long a = 1L;
+        String s = a.toString().trim();
+        System.out.println(s);
+        int pro = 9;
+        String str = "str";
+        System.out.println("is str null or empty ? "+StringHelper.isNullOrEmptyString(str));
+
+        boolean empty = "as".isEmpty();
+        System.out.println("str is String ? ");
+
+        String inEvaluate = "  cdc  ";
+        String evaluate = evaluate(inEvaluate);
+
+        Boolean aTrue = Boolean.valueOf(System.getProperty(String.valueOf(pro)));
+        System.out.println(aTrue);
 
     }
 
@@ -63,8 +81,8 @@ public class UtilsTest {
         //Math.rint() 四舍五入
         double floor = Math.floor(12.5);
         double ceil = Math.ceil(12.5);
-        double rint = Math.rint(12.54);
-        long round = Math.round(-1.3);
+        double rint = Math.rint(12.54);//就近
+        long round = Math.round(-1.3);//四舍五入
         int max = Math.max(1, 3);
         int min = Math.min(-1, -8);
         double exp = Math.exp(1);//e的1次方
@@ -88,7 +106,8 @@ public class UtilsTest {
         //xxxValue()
         Integer x = 5;
         Long longType = 12L;
-
+        String name = x.getClass().getName();
+        System.out.println("x.name : "+name);
         System.out.println(x.intValue());
         long l = x.longValue();
         System.out.println("long类型: " + l);
@@ -161,8 +180,35 @@ public class UtilsTest {
     @Test
         //List
     void List() {
+
+        //List.of
+        
+        
+        String[] strArr = {"1","2","3","5"};
+        for (int i = 0; i < strArr.length; i++) {
+            System.out.println(strArr[i]);
+        }
+
+//        int a1 = 2;
+//        int i = a1 >> 1;
+//        System.out.println(i);
+//
+//        if (a1 > 2)
+//            System.out.println("a1 > 2");
+//        else
+//            System.out.println("a1 <= 2");
+
         String[] arr = {"1", "2", "san", "四"};
+//        String[] copy = new String[10];
+//        System.arraycopy(arr,1,copy,3,3);
+//        System.out.println("-- System.arraycopy --");
+//        for (String s : copy) {
+//            System.out.println(s);
+//        }
+
         List<String> list = Arrays.asList(arr);
+        boolean b = list instanceof List;
+        System.out.println("list is ArrayList ? "+b);
         System.out.println("---get---");
         System.out.println(list.get(0));
         //list的clone
@@ -614,6 +660,14 @@ public class UtilsTest {
 
         //
 
+    }
+
+//    @Test
+//    void
+
+    public String evaluate(String str){
+        System.out.println(str.trim());
+        return str+" !! ";
     }
 
 }

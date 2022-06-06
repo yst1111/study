@@ -1,6 +1,7 @@
 package com.yst.app.controller.messTest;
 
-import org.testng.annotations.Test;
+
+import org.junit.Test;
 
 import java.util.*;
 
@@ -12,6 +13,9 @@ import java.util.*;
 public class DataStructure {
 
     public static void main(String[] args) {
+//        Base64 base64 = new Base64();
+
+
         Enumeration<String> trees;
         Vector<String> treesVe = new Vector<>();//相当于迭代器
         treesVe.add("apple");

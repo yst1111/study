@@ -1,8 +1,8 @@
 package com.yst.app.controller.messTest;
 
+import org.junit.Test;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.testng.annotations.Test;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;

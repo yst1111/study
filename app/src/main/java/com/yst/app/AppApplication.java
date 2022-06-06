@@ -15,7 +15,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 @SpringBootApplication
 @EnableSwagger2
-@MapperScan("com.yst.fira.dto")
+@MapperScan("com.yst.fira.dto")//将本路径下所有类加上@Mapping
 //@ComponentScan({"com.yst.fira.repo"})
 public class AppApplication {
 
