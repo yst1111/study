@@ -2,17 +2,39 @@ package com.yst.app.controller.messTest;
 
 
 import ch.qos.logback.core.db.DriverManagerConnectionSource;
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.FIFOCache;
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.CircleCaptcha;
+import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.captcha.ShearCaptcha;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.ChineseDate;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.*;
+import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.task.Task;
+import cn.hutool.extra.pinyin.PinyinUtil;
+//import cn.hutool.extra.pinyin.TinyPinyin;
+import cn.hutool.extra.pinyin.PinyinUtil;
+import cn.hutool.extra.qrcode.QrCodeUtil;
+import cn.hutool.extra.qrcode.QrConfig;
+import cn.hutool.poi.excel.BigExcelWriter;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.yst.entity.pojo.Student;
 import com.yst.entity.pojo.TPojo;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
@@ -20,19 +42,23 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.bidimap.TreeBidiMap;
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.dbcp.*;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.junit.jupiter.api.Test;
+import org.springframework.cloud.commons.util.IdUtils;
 
 //import org.apache.commons.dbutils.DbUtils;
 
+import javax.imageio.ImageIO;
 import javax.sql.DataSource;
 
 /**
@@ -204,6 +230,7 @@ public class CommonHutoolGuavaTest {
     /*
     * 难得Hutool
     */
+    @SneakyThrows
     @Test
     void Hutool(){
         //DateUtil
@@ -273,7 +300,145 @@ public class CommonHutoolGuavaTest {
         String formatStrUtil = StrUtil.format("a的值为{}, b的值为{}", "aaa", "bbb");
         System.out.println(formatStrUtil);
 
-        //isMatch()
+        //isMatch()   ReUtil.isMatch判断文字
+        boolean isChinese = ReUtil.isMatch(ReUtil.RE_CHINESES, "走走走");
+        System.out.println("isChinese: "+isChinese);
+
+        //集合工具  CollUtil
+        //快速创建各种集合 CollUtil.newXXX()
+        HashSet<String> hashSetForUtilTest = CollUtil.newHashSet("1", "2", "三");
+        List<String> listForUtilTest = CollUtil.newArrayList("1", "2", "5", "8");
+        //两个集合取交集
+        Collection<String> intersection = CollUtil.intersection(hashSetForUtilTest, listForUtilTest);
+        System.out.println("intersection: "+intersection);
+        //两个集合取并集
+        Collection<String> union = CollUtil.union(hashSetForUtilTest, listForUtilTest);
+        System.out.println("union: "+union);
+        //两个集合取并集 除公共部分以外得所有
+        Collection<String> disjunction = CollUtil.disjunction(hashSetForUtilTest, listForUtilTest);
+        System.out.println("disjunction: "+disjunction);
+        //判断集合是否为空 CollUtil.isEmpty()
+        List<Object> listEmpty = CollUtil.newArrayList();
+        System.out.println(CollUtil.isEmpty(hashSetForUtilTest));
+        System.out.println(CollUtil.isEmpty(listEmpty));//里面又空串,null都不算Empty
+
+        //快速创建Map
+        Map<String, Object> mapForUtil = MapUtil.<String, Object>builder()
+                .put("key1", "value1")
+                .put("key2", "value2")
+                .build();
+
+        System.out.println("mapForUtil: "+mapForUtil);
+
+        //好用的场景
+
+        //根据身份证号获取各种信息
+        String idCardNum = "420529199607040033";
+        String cityCodeByIdCard = IdcardUtil.getCityCodeByIdCard(idCardNum);
+        System.out.println(cityCodeByIdCard);//城市号
+        String hide = IdcardUtil.hide(idCardNum, 2, 15);
+        System.out.println(hide);//遮挡x~y字符
+        String convert15To18 = IdcardUtil.convert15To18(idCardNum);
+        System.out.println(convert15To18);
+        boolean IsValidCard = IdcardUtil.isValidCard15(idCardNum);
+        System.out.println("IsValidCard: "+IsValidCard);
+
+        String provinceByIdCard = IdcardUtil.getProvinceByIdCard(idCardNum);
+        System.out.println(provinceByIdCard);
+
+        String randomCreditCode = CreditCodeUtil.randomCreditCode();
+        System.out.println(randomCreditCode);//随机获取社会信用代码
+        boolean IsCreditCode = CreditCodeUtil.isCreditCode(randomCreditCode);
+        System.out.println(IsCreditCode);
+
+        String pinyin = PinyinUtil.getPinyin("中国");
+        System.out.println("中国: "+pinyin);
+
+        //将字符生成二维码
+//        BufferedImage generate = QrCodeUtil.generate("www.baidu.com", QrConfig.create());
+//        ImageIO.write(generate, "png", new File("a.png"));
+
+        //uuid工具
+        String randomUUID = IdUtil.randomUUID();
+        String simpleUUID = IdUtil.simpleUUID();
+        String fastUUID = IdUtil.fastUUID();
+        String fastSimpleUUID = IdUtil.fastSimpleUUID();
+         //雪花算法
+        Snowflake snowflake = IdUtil.createSnowflake(11, 3);
+        long dataCenterId = snowflake.getDataCenterId(2);
+        long generateDateTime = snowflake.getGenerateDateTime(2);
+        long workerId = snowflake.getWorkerId(2);
+        long nextId = snowflake.nextId();  //主要方法
+        System.out.println("snowflake: "+snowflake+"\n"+
+                "dataCenterId: "+dataCenterId+"\n"+
+                "generateDateTime: "+generateDateTime+"\n"+
+                "workerId: "+workerId+"\n"+
+                "nextId: "+nextId+"\n");
+        System.out.println("randomUUID: "+randomUUID);
+        System.out.println("simpleUUID: "+simpleUUID);
+
+        //全局统一的定时任务调度
+        final String schedule = CronUtil.schedule("*/2 * * * * *", (Task) () -> System.out.println("执行定时任务"));
+        CronUtil.setMatchSecond(true);
+        CronUtil.start();
+
+        System.out.println("post task");
+
+        // 生成线段干扰的验证码
+        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100, 5, 3);
+        // 生成圆圈干扰的验证码
+        CircleCaptcha circleCaptcha = CaptchaUtil.createCircleCaptcha(100, 100, 5, 3);
+        // 生成扭曲干扰的验证码
+        ShearCaptcha shearCaptcha = CaptchaUtil.createShearCaptcha(200, 100, 4, 4);
+
+        //id生成策略
+        Date pictureDate = new Date();
+        SimpleDateFormat pictureFormat = new SimpleDateFormat("YYYYMMDDHHMMSS");
+        String substringUUid = IdUtil.simpleUUID().substring(0, 4);
+        String pictureName = pictureFormat.format(pictureDate)+substringUUid;
+
+        lineCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/zhixian"+pictureName+".png");
+        circleCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/yuanquan"+pictureName+".png");
+        shearCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/niuqu"+pictureName+".png");
+
+        //缓存
+        FIFOCache<String, Object> cache = CacheUtil.newFIFOCache(1000, 3000 * 10);
+        cache.put("a","1");
+        System.out.println(cache.get("a"));
+
+    }
+
+    @Test
+    void HutoolExcel(){
+        // 将文件转换为ExcelReader  读
+        ExcelReader reader = ExcelUtil.getReader("C:/Users/ly-yangst/Desktop/常用工具/客户账户.xlsx");
+        System.out.println("reader: "+reader);
+        // 读取所有行和列的数据
+        List<List<Object>> data = reader.read();
+        System.out.println("data: "+data);
+        // 读取为Map列表，默认excel第一行为标题行，Map中的key为标题，value为标题对应的单元格值。
+        List<Map<String,Object>> dataMap = reader.readAll();
+        System.out.println("dataMap: "+dataMap);
+
+
+        //Writer  写
+        ExcelWriter writer = ExcelUtil.getWriter("D:/客户账户.xlsx");
+        BigExcelWriter bigWriter = ExcelUtil.getBigWriter("D:/客户账户.xlsx");//大数据量
+
+        List<String> row1 = CollUtil.newArrayList("aa", "bb", "cc", "dd");
+        List<String> row2 = CollUtil.newArrayList("aa1", "bb1", "cc1", "dd1");
+        List<String> row3 = CollUtil.newArrayList("aa2", "bb2", "cc2", "dd2");
+        List<String> row4 = CollUtil.newArrayList("aa3", "bb3", "cc3", "dd3");
+        List<String> row5 = CollUtil.newArrayList("aa4", "bb4", "cc4", "dd4");
+        List<List<String>> rows = CollUtil.newArrayList(row1, row2, row3, row4, row5); //这个创建太好用了
+
+        bigWriter.write(rows,true);
+
+
+    }
+
+    @Test
+    void HutoolHttp(){
 
 
     }

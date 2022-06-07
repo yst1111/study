@@ -1,5 +1,7 @@
 package com.yst.fira.repo.user.impl;
 
+import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.task.Task;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.yst.entity.pojo.Student;
@@ -35,6 +37,13 @@ public class UserRespository implements IUserRespository {
     @Override
     public Student selectWithSorces(Student student) {
         studentMapper.selectById(student);
+        //全局统一的定时任务调度
+        final String schedule = CronUtil.schedule("*/2 * * * * *", (Task) () -> System.out.println("执行定时任务"));
+        CronUtil.setMatchSecond(true);
+        CronUtil.start();
+
+        System.out.println("post task");
+
         return null;
     }
 
