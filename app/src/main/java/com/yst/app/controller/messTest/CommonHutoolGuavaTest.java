@@ -8,22 +8,29 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.captcha.ShearCaptcha;
+import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.ChineseDate;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.asymmetric.KeyType;
+import cn.hutool.crypto.asymmetric.Sign;
+import cn.hutool.crypto.asymmetric.SignAlgorithm;
 import cn.hutool.extra.pinyin.PinyinUtil;
 //import cn.hutool.extra.pinyin.TinyPinyin;
 import cn.hutool.extra.pinyin.PinyinUtil;
 import cn.hutool.extra.qrcode.QrCodeUtil;
 import cn.hutool.extra.qrcode.QrConfig;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.poi.excel.BigExcelWriter;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
@@ -36,6 +43,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.security.KeyPair;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -53,6 +61,7 @@ import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.dbcp.*;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.commons.util.IdUtils;
 
@@ -200,7 +209,7 @@ public class CommonHutoolGuavaTest {
     }
 
     @Test
-    void DbUtils(){
+    void DbUtils() {
 //        Connection conn = null;
 //        String url = "jdbc:mysql://192.168.41.188:3306/test411";
 //        String jdbcDriver = "com.mysql.cj.jdbc.Driver";
@@ -228,16 +237,16 @@ public class CommonHutoolGuavaTest {
     //HttpClient
 
     /*
-    * 难得Hutool
-    */
+     * 难得Hutool
+     */
     @SneakyThrows
     @Test
-    void Hutool(){
+    void Hutool() {
         //DateUtil
         int year = DateUtil.year(new Date());
         System.out.println(year);//2022
         String today = DateUtil.today();
-        System.out.println("today: "+today);//2022-06-06
+        System.out.println("today: " + today);//2022-06-06
 
         String chineseZodiac = DateUtil.getChineseZodiac(year);
         System.out.println(chineseZodiac); //生肖: 虎
@@ -262,39 +271,39 @@ public class CommonHutoolGuavaTest {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
         String formatDate = format.format(date);
-        System.out.println("formatDate: "+formatDate);
+        System.out.println("formatDate: " + formatDate);
         final LocalDateTime localDateTime = LocalDateTimeUtil.of(date);
-        System.out.println("localDateTime: "+localDateTime);// 方便地将Date转换为LocalDateTime
+        System.out.println("localDateTime: " + localDateTime);// 方便地将Date转换为LocalDateTime
 
         // 获取一天开始时间
         LocalDateTime localbeginOfDay = LocalDateTimeUtil.beginOfDay(localDateTime);
         DayOfWeek dayOfWeek = localbeginOfDay.getDayOfWeek();
         int dayOfMonth = localbeginOfDay.getDayOfMonth();
 //        String formatLocalbeginOfDay = format.format(localbeginOfDay);
-        System.out.println("localbeginOfDay "+localbeginOfDay);
-        System.out.println("localbeginOfDay-dayOfWeek "+dayOfWeek);
-        System.out.println("localbeginOfDay-dayOfMonth "+dayOfMonth);
+        System.out.println("localbeginOfDay " + localbeginOfDay);
+        System.out.println("localbeginOfDay-dayOfWeek " + dayOfWeek);
+        System.out.println("localbeginOfDay-dayOfMonth " + dayOfMonth);
         // 获取一天结束时间
         LocalDateTime endOfDay = LocalDateTimeUtil.endOfDay(localDateTime);
 //        String formatEndOfDay = format.format(endOfDay);
-        System.out.println("endOfDay "+endOfDay);
+        System.out.println("endOfDay " + endOfDay);
 
         //IoUtil 复制文件
         BufferedInputStream in = FileUtil.getInputStream("D:/1.jpg");
         BufferedOutputStream out = FileUtil.getOutputStream("D:/2.jpg");
 
-        IoUtil.copy(in,out);
+        IoUtil.copy(in, out);
 
 
         //StrUtil 字符处理工具
         String strEmpty = " ";
-        System.out.println("is empty ?"+StrUtil.isEmpty(strEmpty));//是否为null或空串
+        System.out.println("is empty ?" + StrUtil.isEmpty(strEmpty));//是否为null或空串
         String strBlank = " ";
         boolean blank = StrUtil.isBlank(strBlank);//为null或空串或空白字符
-        System.out.println("is Blank ?"+blank);
+        System.out.println("is Blank ?" + blank);
 
         String fillAfter = StrUtil.fillAfter(strEmpty, '*', 10);//将字符串用指定字符填充到指定长度 往后填充
-        System.out.println("fillAfter "+fillAfter);
+        System.out.println("fillAfter " + fillAfter);
 
         //通过{}占位,书写模板
         String formatStrUtil = StrUtil.format("a的值为{}, b的值为{}", "aaa", "bbb");
@@ -302,7 +311,7 @@ public class CommonHutoolGuavaTest {
 
         //isMatch()   ReUtil.isMatch判断文字
         boolean isChinese = ReUtil.isMatch(ReUtil.RE_CHINESES, "走走走");
-        System.out.println("isChinese: "+isChinese);
+        System.out.println("isChinese: " + isChinese);
 
         //集合工具  CollUtil
         //快速创建各种集合 CollUtil.newXXX()
@@ -310,13 +319,13 @@ public class CommonHutoolGuavaTest {
         List<String> listForUtilTest = CollUtil.newArrayList("1", "2", "5", "8");
         //两个集合取交集
         Collection<String> intersection = CollUtil.intersection(hashSetForUtilTest, listForUtilTest);
-        System.out.println("intersection: "+intersection);
+        System.out.println("intersection: " + intersection);
         //两个集合取并集
         Collection<String> union = CollUtil.union(hashSetForUtilTest, listForUtilTest);
-        System.out.println("union: "+union);
+        System.out.println("union: " + union);
         //两个集合取并集 除公共部分以外得所有
         Collection<String> disjunction = CollUtil.disjunction(hashSetForUtilTest, listForUtilTest);
-        System.out.println("disjunction: "+disjunction);
+        System.out.println("disjunction: " + disjunction);
         //判断集合是否为空 CollUtil.isEmpty()
         List<Object> listEmpty = CollUtil.newArrayList();
         System.out.println(CollUtil.isEmpty(hashSetForUtilTest));
@@ -328,7 +337,7 @@ public class CommonHutoolGuavaTest {
                 .put("key2", "value2")
                 .build();
 
-        System.out.println("mapForUtil: "+mapForUtil);
+        System.out.println("mapForUtil: " + mapForUtil);
 
         //好用的场景
 
@@ -341,7 +350,7 @@ public class CommonHutoolGuavaTest {
         String convert15To18 = IdcardUtil.convert15To18(idCardNum);
         System.out.println(convert15To18);
         boolean IsValidCard = IdcardUtil.isValidCard15(idCardNum);
-        System.out.println("IsValidCard: "+IsValidCard);
+        System.out.println("IsValidCard: " + IsValidCard);
 
         String provinceByIdCard = IdcardUtil.getProvinceByIdCard(idCardNum);
         System.out.println(provinceByIdCard);
@@ -352,7 +361,7 @@ public class CommonHutoolGuavaTest {
         System.out.println(IsCreditCode);
 
         String pinyin = PinyinUtil.getPinyin("中国");
-        System.out.println("中国: "+pinyin);
+        System.out.println("中国: " + pinyin);
 
         //将字符生成二维码
 //        BufferedImage generate = QrCodeUtil.generate("www.baidu.com", QrConfig.create());
@@ -363,19 +372,19 @@ public class CommonHutoolGuavaTest {
         String simpleUUID = IdUtil.simpleUUID();
         String fastUUID = IdUtil.fastUUID();
         String fastSimpleUUID = IdUtil.fastSimpleUUID();
-         //雪花算法
+        //雪花算法
         Snowflake snowflake = IdUtil.createSnowflake(11, 3);
         long dataCenterId = snowflake.getDataCenterId(2);
         long generateDateTime = snowflake.getGenerateDateTime(2);
         long workerId = snowflake.getWorkerId(2);
         long nextId = snowflake.nextId();  //主要方法
-        System.out.println("snowflake: "+snowflake+"\n"+
-                "dataCenterId: "+dataCenterId+"\n"+
-                "generateDateTime: "+generateDateTime+"\n"+
-                "workerId: "+workerId+"\n"+
-                "nextId: "+nextId+"\n");
-        System.out.println("randomUUID: "+randomUUID);
-        System.out.println("simpleUUID: "+simpleUUID);
+        System.out.println("snowflake: " + snowflake + "\n" +
+                "dataCenterId: " + dataCenterId + "\n" +
+                "generateDateTime: " + generateDateTime + "\n" +
+                "workerId: " + workerId + "\n" +
+                "nextId: " + nextId + "\n");
+        System.out.println("randomUUID: " + randomUUID);
+        System.out.println("simpleUUID: " + simpleUUID);
 
         //全局统一的定时任务调度
         final String schedule = CronUtil.schedule("*/2 * * * * *", (Task) () -> System.out.println("执行定时任务"));
@@ -395,30 +404,30 @@ public class CommonHutoolGuavaTest {
         Date pictureDate = new Date();
         SimpleDateFormat pictureFormat = new SimpleDateFormat("YYYYMMDDHHMMSS");
         String substringUUid = IdUtil.simpleUUID().substring(0, 4);
-        String pictureName = pictureFormat.format(pictureDate)+substringUUid;
+        String pictureName = pictureFormat.format(pictureDate) + substringUUid;
 
-        lineCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/zhixian"+pictureName+".png");
-        circleCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/yuanquan"+pictureName+".png");
-        shearCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/niuqu"+pictureName+".png");
+        lineCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/zhixian" + pictureName + ".png");
+        circleCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/yuanquan" + pictureName + ".png");
+        shearCaptcha.write("D:/ok_dev1.0/app/src/main/resources/direc/niuqu" + pictureName + ".png");
 
         //缓存
         FIFOCache<String, Object> cache = CacheUtil.newFIFOCache(1000, 3000 * 10);
-        cache.put("a","1");
+        cache.put("a", "1");
         System.out.println(cache.get("a"));
 
     }
 
     @Test
-    void HutoolExcel(){
+    void HutoolExcel() {
         // 将文件转换为ExcelReader  读
         ExcelReader reader = ExcelUtil.getReader("C:/Users/ly-yangst/Desktop/常用工具/客户账户.xlsx");
-        System.out.println("reader: "+reader);
+        System.out.println("reader: " + reader);
         // 读取所有行和列的数据
         List<List<Object>> data = reader.read();
-        System.out.println("data: "+data);
+        System.out.println("data: " + data);
         // 读取为Map列表，默认excel第一行为标题行，Map中的key为标题，value为标题对应的单元格值。
-        List<Map<String,Object>> dataMap = reader.readAll();
-        System.out.println("dataMap: "+dataMap);
+        List<Map<String, Object>> dataMap = reader.readAll();
+        System.out.println("dataMap: " + dataMap);
 
 
         //Writer  写
@@ -432,17 +441,84 @@ public class CommonHutoolGuavaTest {
         List<String> row5 = CollUtil.newArrayList("aa4", "bb4", "cc4", "dd4");
         List<List<String>> rows = CollUtil.newArrayList(row1, row2, row3, row4, row5); //这个创建太好用了
 
-        bigWriter.write(rows,true);
+        bigWriter.write(rows, true);
 
+
+    }
+
+    //类似Python爬虫
+    @Test
+    void HutoolHttp() {
+        Map<String, Object> params = MapUtil.<String, Object>builder().put("a", 1).build();
+        //发送http的get请求
+//        String getResult = HttpUtil.get("https://www.baidu.com", params);
+//        System.out.println("getResult: "+getResult);//搞出来的是html文件
+        //发送http的post请求
+//        String postResult = HttpUtil.post("https://www.baidu.com", params);
+//        System.out.println("postResult: "+postResult);
+        //发送http的application/json的post请求
+//        String jsonResult = HttpUtil.post("https://www.baidu.com", JSON.toString(params));
+//        System.out.println("jsonResult: "+jsonResult);
+
+        //下载文件
+//        String fileUrl = "https://image.baidu.com/search/down?tn=download&ipn=dwnl&word=download&ie=utf8&fr=result&url=https%3A%2F%2Fss2.baidu.com%2F-vo3dSag_xI4khGko9WTAnF6hhy%2Fexp%2Fwhcrop%3D160%2C120%2Fsign%3Dee0cbe61f8039245a1e0b74de8e499f3%2F810a19d8bc3eb1351e38ff17a21ea8d3fc1f449a.jpg&thumburl=https%3A%2F%2Fimg2.baidu.com%2Fit%2Fu%3D3265033000%2C577978128%26fm%3D253%26fmt%3Dauto%26app%3D138%26f%3DJPEG%3Fw%3D160%26h%3D120";
+        String excelUrl = "http://172.26.165.119:29124/gateway/beiservice/excel/template/download?templateCode=BANK_INFO&tenancyId=98336883-bc5c-11ec-998c-005056a87c64&menuId=957ed1d7d31b422f91056c37b9bd32cd&menuName=%E9%93%B6%E8%A1%8C%E4%BF%A1%E6%81%AF%E7%BB%B4%E6%8A%A4&orgTemplateId=98337ab0-bc5c-11ec-998c-005056a87c64&ClientServer=http%3A%2F%2F172.26.165.119%3A29124";
+        //这玩意有点牛逼
+        HttpUtil.downloadFile(excelUrl, FileUtil.file("e:/"), new StreamProgress() { //加入钩子函数
+            @Override
+            public void start() {
+                System.out.println("开始下载");
+            }
+
+            @Override
+            public void progress(long l) {
+//                System.out.println("下载中，已下载" + FileUtil.readableFileSize(progressSize));
+                System.out.println("下载中，已下载" + FileUtil.readableFileSize(FileUtil.file("e:/")));
+            }
+
+            @Override
+            public void finish() {
+                System.out.println("下载完成");
+            }
+        });
 
     }
 
     @Test
-    void HutoolHttp(){
+    void HutoolJiaMi() {
+        String word = "assa";
+        String MD5 = SecureUtil.md5(word);//md5是一种不可逆的加密算法
+        String sha1 = SecureUtil.sha1(word);
+        System.out.println("MD5: "+MD5+"\n"+"sha1: "+sha1+"\n");
+
+        System.out.println();
+        // 生成非对称密钥对
+        KeyPair keyPair = SecureUtil.generateKeyPair("RSA");
+        String publicKey = Base64Encoder.encode(keyPair.getPublic().getEncoded());
+        String privateKey = Base64Encoder.encode(keyPair.getPrivate().getEncoded());
+        // 利用公钥加密
+        String encryptBase64 = SecureUtil.rsa(privateKey, publicKey).encryptBase64("abc", KeyType.PublicKey);
+        // 利用私钥解密
+        String decrypt = new String(SecureUtil.rsa(privateKey, publicKey).decrypt(encryptBase64, KeyType.PrivateKey));
+        System.out.println("keyPair: "+keyPair+"\n"+
+                "publicKey: "+publicKey+"\n"+
+                "privateKey: "+privateKey+"\n"+
+                "encryptBase64: "+encryptBase64+"\n"+
+                "decrypt: "+decrypt+"\n");
+
+        //签名和验签
+        //创建签名
+        Sign sign = SecureUtil.sign(SignAlgorithm.MD5withRSA);
+        //生成签名
+        String wordForSign = "aac";
+        byte[] signBytes = wordForSign.getBytes();
+        byte[] signed = sign.sign(signBytes);
+        //验证签名
+        boolean verify = sign.verify(signBytes, signed);
+        System.out.println(verify);
 
 
     }
 
 
-
-    }
+}
