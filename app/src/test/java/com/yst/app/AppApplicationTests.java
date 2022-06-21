@@ -1,8 +1,11 @@
 package com.yst.app;
 
+import cn.hutool.core.lang.Console;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.yst.app.controller.assember.DemoAsb;
 import com.yst.entity.domain.CompanyDTO;
+import com.yst.entity.dto.StudentDto;
 import com.yst.entity.pojo.Student;
 import com.yst.fira.dto.StudentMapper;
 import org.junit.jupiter.api.Test;
@@ -122,13 +125,7 @@ class AppApplicationTests {
     }
 
 
-
-
-
-
-
-
-        @Test
+    @Test
     void testSelectUser() {
         List<String> list = new ArrayList<>();
         List<String> list1 = new ArrayList<>();
@@ -193,4 +190,20 @@ class AppApplicationTests {
 //        System.out.println(collect1);
 
     }
+
+    @Autowired
+    private DemoAsb demoAsb;
+    @Test
+    void test4(){
+        Student student = new Student();
+        student.setId("81");
+        student.setName("yst");
+        student.setAge(12);
+        student.setLike("篮球");
+        student.setLikes("足球⚽");
+        student.setCountry("213");
+        StudentDto studentDto = demoAsb.poToDto(student);
+        Console.log(studentDto);
+    }
+
 }

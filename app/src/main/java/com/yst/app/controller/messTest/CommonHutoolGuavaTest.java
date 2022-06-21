@@ -10,14 +10,21 @@ import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.captcha.ShearCaptcha;
 import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.ChineseDate;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.collection.LineIter;
+import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.collection.PartitionIter;
+import cn.hutool.core.date.*;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.StreamProgress;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.lang.WeightRandom;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.thread.AsyncUtil;
+import cn.hutool.core.thread.ConcurrencyTester;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
@@ -39,9 +46,8 @@ import com.yst.entity.pojo.Student;
 import com.yst.entity.pojo.TPojo;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
+import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.sql.Connection;
@@ -49,7 +55,13 @@ import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+import com.yst.fira.repo.user.impl.MybatisTestRespository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -61,9 +73,13 @@ import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.dbcp.*;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.log4j.Logger;
 import org.eclipse.jetty.util.ajax.JSON;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.commons.util.IdUtils;
+import org.springframework.scheduling.annotation.Async;
+import org.w3c.dom.Document;
 
 //import org.apache.commons.dbutils.DbUtils;
 
@@ -331,11 +347,52 @@ public class CommonHutoolGuavaTest {
         System.out.println(CollUtil.isEmpty(hashSetForUtilTest));
         System.out.println(CollUtil.isEmpty(listEmpty));//里面又空串,null都不算Empty
 
+        //CollUtil.edit() 编辑List 这个贼好用
+        List<String> list = CollUtil.newArrayList("一", "二", "三");
+        List<String> edit = (List<String>) CollUtil.edit(list, ele -> ele + ele);
+        Console.log("list: {}", list);
+        Console.log("edit: {}", edit);
+
+        //分页工具
+        PageUtil.setFirstPageNo(1);//设置初始页码
+        List<String> page = ListUtil.page(1, 2, list);
+        Console.log("page: {}", page);
+        page.clear();//清除
+        Console.log("page: {}", page);
+
+        //按属性排序
+//        ListUtil.sortByProperty()
+//        ListUtil.swapTo
+//        ListUtil.swapElement()
+
         //快速创建Map
         Map<String, Object> mapForUtil = MapUtil.<String, Object>builder()
                 .put("key1", "value1")
                 .put("key2", "value2")
                 .build();
+        HashMap<Object, Object> map = MapUtil.newHashMap();
+        //MapUtil.of
+        HashMap<Object, Object> ofMapUtil = MapUtil.of(new String[][]{
+                {"1", "张三"},
+                {"2", "李四"},
+                {"3", "王五"}
+//                {null,"赵四"},
+//                {"5",null}
+        });
+        Console.log("ofMapUtil: ", ofMapUtil);
+
+        //MapUtil.toListMap()
+        //MapUtil.toMapList
+        String join = MapUtil.join(ofMapUtil, " - ", ":");
+        Console.log("join: ", join); //将map按一定格式转为String
+        String joinIgnoreNull = MapUtil.joinIgnoreNull(ofMapUtil, " - ", ":");
+        Console.log("joinIgnoreNull: ", joinIgnoreNull); //忽略key为null 或者 value为null 的
+        //用这个就行了
+        String sortJoin = MapUtil.sortJoin(ofMapUtil, StrUtil.SPACE, StrUtil.COLON, true);
+        Console.log("sortJoin: ", sortJoin); //忽略key为null 或者 value为null 的
+
+
+//        MapUtil.edit(mapForUtil,)
 
         System.out.println("mapForUtil: " + mapForUtil);
 
@@ -464,21 +521,24 @@ public class CommonHutoolGuavaTest {
 //        String fileUrl = "https://image.baidu.com/search/down?tn=download&ipn=dwnl&word=download&ie=utf8&fr=result&url=https%3A%2F%2Fss2.baidu.com%2F-vo3dSag_xI4khGko9WTAnF6hhy%2Fexp%2Fwhcrop%3D160%2C120%2Fsign%3Dee0cbe61f8039245a1e0b74de8e499f3%2F810a19d8bc3eb1351e38ff17a21ea8d3fc1f449a.jpg&thumburl=https%3A%2F%2Fimg2.baidu.com%2Fit%2Fu%3D3265033000%2C577978128%26fm%3D253%26fmt%3Dauto%26app%3D138%26f%3DJPEG%3Fw%3D160%26h%3D120";
         String excelUrl = "http://172.26.165.119:29124/gateway/beiservice/excel/template/download?templateCode=BANK_INFO&tenancyId=98336883-bc5c-11ec-998c-005056a87c64&menuId=957ed1d7d31b422f91056c37b9bd32cd&menuName=%E9%93%B6%E8%A1%8C%E4%BF%A1%E6%81%AF%E7%BB%B4%E6%8A%A4&orgTemplateId=98337ab0-bc5c-11ec-998c-005056a87c64&ClientServer=http%3A%2F%2F172.26.165.119%3A29124";
         //这玩意有点牛逼
-        HttpUtil.downloadFile(excelUrl, FileUtil.file("e:/"), new StreamProgress() { //加入钩子函数
+        HttpUtil.downloadFile(excelUrl, FileUtil.file("e:/"), new StreamProgress() {
             @Override
             public void start() {
                 System.out.println("开始下载");
+
             }
 
             @Override
-            public void progress(long l) {
+            public void progress(long l, long l1) {
 //                System.out.println("下载中，已下载" + FileUtil.readableFileSize(progressSize));
                 System.out.println("下载中，已下载" + FileUtil.readableFileSize(FileUtil.file("e:/")));
+
             }
 
             @Override
             public void finish() {
                 System.out.println("下载完成");
+
             }
         });
 
@@ -489,7 +549,7 @@ public class CommonHutoolGuavaTest {
         String word = "assa";
         String MD5 = SecureUtil.md5(word);//md5是一种不可逆的加密算法
         String sha1 = SecureUtil.sha1(word);
-        System.out.println("MD5: "+MD5+"\n"+"sha1: "+sha1+"\n");
+        System.out.println("MD5: " + MD5 + "\n" + "sha1: " + sha1 + "\n");
 
         System.out.println();
         // 生成非对称密钥对
@@ -500,11 +560,11 @@ public class CommonHutoolGuavaTest {
         String encryptBase64 = SecureUtil.rsa(privateKey, publicKey).encryptBase64("abc", KeyType.PublicKey);
         // 利用私钥解密
         String decrypt = new String(SecureUtil.rsa(privateKey, publicKey).decrypt(encryptBase64, KeyType.PrivateKey));
-        System.out.println("keyPair: "+keyPair+"\n"+
-                "publicKey: "+publicKey+"\n"+
-                "privateKey: "+privateKey+"\n"+
-                "encryptBase64: "+encryptBase64+"\n"+
-                "decrypt: "+decrypt+"\n");
+        System.out.println("keyPair: " + keyPair + "\n" +
+                "publicKey: " + publicKey + "\n" +
+                "privateKey: " + privateKey + "\n" +
+                "encryptBase64: " + encryptBase64 + "\n" +
+                "decrypt: " + decrypt + "\n");
 
         //签名和验签
         //创建签名
@@ -517,8 +577,301 @@ public class CommonHutoolGuavaTest {
         boolean verify = sign.verify(signBytes, signed);
         System.out.println(verify);
 
-
     }
 
 
+    @Test
+    public void HutoolConsloe() {
+        Console.log("你好{},{},{}", "console", " empoy", "dai!");
+        Console.log("hi Console");
+        Console.error("error");
+
+        Logger logg = Logger.getLogger(CommonHutoolGuavaTest.class);
+        logg.error("你好,log4j {}");
+
+    }
+
+    @Test
+    //RandomUtil 随机工具类
+    public void HutoolRandom() {
+        DateTime dateTime = RandomUtil.randomDay(1, 4);
+        Console.log(dateTime);
+
+        //随机从集合中去一个元素
+        ArrayList<String> list = CollUtil.newArrayList("1", "2", "3");
+        String ele = RandomUtil.randomEle(list);
+        Console.log(ele);
+
+        double randomDouble = RandomUtil.randomDouble(2.3, 5);
+        Console.log(randomDouble);
+
+        //指定长度的随机数
+        String randomNumbers = RandomUtil.randomNumbers(3);
+        Console.log(randomNumbers);
+
+        //加权随机数
+        List<WeightRandom.WeightObj<String>> weightList = new ArrayList<WeightRandom.WeightObj<String>>();
+        WeightRandom.WeightObj<String> a = new WeightRandom.WeightObj<String>("A", 1);
+        WeightRandom.WeightObj<String> b = new WeightRandom.WeightObj<String>("B", 2);
+        WeightRandom.WeightObj<String> c = new WeightRandom.WeightObj<String>("C", 3);
+        WeightRandom.WeightObj<String> d = new WeightRandom.WeightObj<String>("D", 4);
+        weightList.add(a);
+        weightList.add(b);
+        weightList.add(c);
+        weightList.add(d);
+        WeightRandom wr = RandomUtil.weightRandom(weightList);
+        Console.log("wr: {}", wr);
+        Console.log(wr.next());  //取随机数
+        String str = "";
+        int num_a = 0, num_b = 0, num_c = 0, num_d = 0;
+        for (int i = 0; i < 100000; i++) {
+            str = wr.next().toString();
+            switch (str) {
+                case "A":
+                    num_a = num_a + 1;
+                    break;
+                case "B":
+                    num_b = num_b + 1;
+                    break;
+                case "C":
+                    num_c = num_c + 1;
+                    break;
+                case "D":
+                    num_d = num_d + 1;
+                    break;
+            }
+            //System.out.println(str);
+        }
+        Console.log("A出现的次数: {}", num_a);
+        Console.log("B出现的次数: {}", num_b);
+        Console.log("C出现的次数: {}", num_c);
+        Console.log("D出现的次数: {}", num_d);
+//        RandomUtil.weightRandom();
+
+    }
+
+    @Test
+        //秒表工具  用于计时
+    void HutoolSecondWatch() throws InterruptedException {
+        StopWatch stopWatch = new StopWatch("任务名称");
+
+        // 任务1
+        stopWatch.start("任务一");
+        Thread.sleep(1000);
+        stopWatch.stop();
+
+        // 任务2
+        stopWatch.start("任务二");
+        Thread.sleep(2000);
+        stopWatch.stop();
+
+        // 打印出耗时
+        Console.log(stopWatch.prettyPrint());
+    }
+
+    @Test
+    void newClassWrite() {
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        class pojo implements Serializable {
+            private String name;
+            private String age;
+            private String work;
+
+        }
+
+        pojo pojo = new pojo();
+        Console.log(pojo);
+        pojo pojo1 = new pojo("张三", "19", "码农");
+        Console.log(pojo1);
+
+
+    }
+
+    @Test
+        //读取Classpath下的资源
+    void HutoolResourceUtil() throws IOException {
+
+        //ResourceUtil.getUtf8Reader() 读取Resource下的文件
+        LineIter lineIter = new LineIter(ResourceUtil.getUtf8Reader("application.yml"));
+        PartitionIter<String> iter = new PartitionIter<>(lineIter, 1);
+        for (List<String> lines : iter) {
+            Console.log(lines);
+        }
+
+        List<Integer> list = ListUtil.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 0, 12, 45, 12);
+        PartitionIter<Integer> iter1 = new PartitionIter<>(list.iterator(), 1);
+
+        for (List<Integer> lines : iter1) {
+            Console.log(lines);
+        }
+
+    }
+
+    @Test
+    void HutoolThreadUtil() {
+
+        //直接在公共线程池中执行线程
+//        ThreadUtil.execute(() -> Console.log("gogogo"));
+
+        //ThreadUtil.concurrencyTest()
+
+        //并发测试
+        // 此方法用于测试多线程下执行某些逻辑的并发性能
+        // 调用此方法会导致当前线程阻塞
+        // 结束后可调用ConcurrencyTester.getInterval() 方法获取执行时间
+//        ConcurrencyTester tester = ThreadUtil.concurrencyTest(100, () -> {
+//            long delay = RandomUtil.randomLong(100, 1000);
+//            ThreadUtil.sleep(delay);
+//            Console.log("{} test finished, delay: {}", Thread.currentThread().getName(), delay);
+//        });
+//        Console.log(tester.getInterval());
+
+//        ConcurrencyTester ct = new ConcurrencyTester(5);
+//        for (int i = 0; i < 5; i++) {
+//            Console.log("第{}个线程开始执行..",i+1);
+//            ct.test(() ->{
+//                Console.log("当前执行线程: {} 产生时间 {}",Thread.currentThread().getName(),DateUtil.now());
+//                try {
+//                    Thread.sleep(RandomUtil.randomInt(1000,3000));
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            });
+
+        StopWatch yst_is_handsome = new StopWatch("yst is handsome");
+        yst_is_handsome.start("yst");
+        CompletableFuture<String> yst = CompletableFuture.supplyAsync(() -> {
+            ThreadUtil.sleep(1, TimeUnit.SECONDS);
+            return "yst";
+        });
+        yst_is_handsome.stop();
+
+        yst_is_handsome.start("is");
+        CompletableFuture<String> is = CompletableFuture.supplyAsync(() -> {
+            ThreadUtil.sleep(2, TimeUnit.SECONDS);
+            return " is ";
+        });
+        yst_is_handsome.stop();
+
+        yst_is_handsome.start("handsome");
+        CompletableFuture<String> handsome = CompletableFuture.supplyAsync(() -> {
+            ThreadUtil.sleep(3, TimeUnit.SECONDS);
+            return " handsome";
+        });
+        yst_is_handsome.stop();
+
+        //等待完成
+        AsyncUtil.waitAll(yst, is, handsome);
+        //获取结果
+        Console.log(AsyncUtil.get(yst) + AsyncUtil.get(is) + AsyncUtil.get(handsome));
+
+        Console.error(yst_is_handsome.prettyPrint());
+
+    }
+
+    @Test
+    void HutoolStr(){
+        // 包含：制表符、英文空格、不间断空白符、全角空格
+        String strCleanBlank = "	 你 好　";
+        String cleanBlank = StrUtil.cleanBlank(strCleanBlank);
+        Console.log(cleanBlank);
+
+        //把字符串切割成数组
+        String strCut = "aaabbbcccdddaadfdfsdfsdf0";
+        String[] cut = StrUtil.cut(strCut, 4);
+        Console.log("cut: {}",cut);
+        List<String> cutList = Arrays.asList(cut);
+        Console.log("cutList: {}",cutList);
+
+        //根据符合分隔字符串,可选ignore空,可选Trim
+        String strSplit = "a,b ,c,d,,e";
+        List<String> splitList = StrUtil.split(strSplit, ',', -1, true, false);
+        Console.log("splitList: {}",splitList);
+        //切成数组
+        String[] splitToArrayString = StrUtil.splitToArray("abc/aa", "/");
+        Console.log("splitToArrayString: ",splitToArrayString);
+
+    }
+
+    @Test
+    void splitEmpty(){
+
+        String strEmpty = "";
+        List<String> splitString = StrUtil.split(strEmpty, ",", -1, true, true);
+        Console.log(splitString);
+
+        String strSplitToLong = "1,2,3,4, 5";
+        long[] splitToLong = StrUtil.splitToLong(strSplitToLong, ',');
+        Console.log(splitToLong);
+
+    }
+
+    @Test
+    void splitToIntTest(){
+
+        String strSplitToInt = "1,2,3,4, 5";
+        int[] intArray = StrUtil.splitToInt(strSplitToInt, ',');
+        Console.log("intArray: {}",intArray);
+
+        //replace 替换
+        String replaceString = StrUtil.replace("aabbccdd", 2, 6, '*');
+        Console.log(replaceString);
+
+        String replaceString2 = StrUtil.replace("aabbccdd", "b", "00");
+        Console.log(replaceString2);
+
+
+
+    }
+
+    @Test
+    void HutoolUrlXml(){
+
+        //规范化 URL 地址
+        String url = "/www.hutool.cn//aaa/bbb";
+        String normalize = URLUtil.normalize(url);
+        Console.log(normalize);
+
+        //URLUtil.encode()
+        String body = "a_副本.jpg";
+        String encode = URLUtil.encode(body);
+        Console.log(encode);
+
+        String encode1 = URLUtil.encodeQuery(body);
+        Console.log(encode1);
+
+        //取出请求的部分
+        String path = URLUtil.getPath(normalize);
+        Console.log(path);
+
+        //XML读取
+        String result = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"//
+                + "<returnsms>"//
+                + "<returnstatus>Success</returnstatus>"//
+                + "<message>ok</message>"//
+                + "<remainpoint>1490</remainpoint>"//
+                + "<taskID>885</taskID>"//
+                + "<successCounts>1</successCounts>"//
+                + "</returnsms>";
+        Document docResult = XmlUtil.parseXml(result);
+        String elementText = XmlUtil.elementText(docResult.getDocumentElement(), "message");
+        Console.log(elementText);
+
+        //XML的写
+//        Document docResult = XmlUtil.parseXml(result);
+//        XmlUtil.toFile(docResult, "e:/aaa.xml", "utf-8");
+
+
+
+
+    }
+
+//    @Test
+//    void
+
+
 }
+

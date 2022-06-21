@@ -1,0 +1,18 @@
+#----------appname and config center config------------------
+spring:
+  application:
+    name: app_controller_provider
+  cloud:
+    nacos:
+      config:
+#        enabled: ${APP_ENABLED:false}
+        file-extension: yml
+        server-addr: localhost:8848
+#        namespace: ${APP_CONFIG_NAMESPACE:youcloud-demo}
+        username: nacos
+        password: nacos
+#        shared-configs:
+#          - data-id: ${spring.application.name}-message.properties
+#            refresh: false
+        
+#注册如果使用配置属性则需要将testswagger1-dev.yml为dataid,配置到nacos中 
