@@ -10,6 +10,7 @@ import com.yst.entity.pojo.Student;
 import com.yst.fira.dto.StudentMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -25,6 +26,15 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
 
 //@SpringBootTest
 class AppApplicationTests {
+
+    @Value("password")
+    public String password;
+
+    @Test
+    void test() {
+        System.out.println(password);
+    }
+
 
     @Autowired
     StudentMapper studentMapper;

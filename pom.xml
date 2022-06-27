@@ -46,6 +46,7 @@
         </dependency>
 
         <!--自己加的web起步依赖-->
+        <!--导入web依赖,就有了接收请求的能力-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -83,6 +84,17 @@
             <version>3.2.0</version>
         </dependency>
 
+        <!-- 引入mybatis-plus-generator依赖 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-generator</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.30</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

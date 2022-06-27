@@ -1,0 +1,8 @@
+#Initializer 初始化器 在还没开启容器时就注入一些bean
+org.springframework.boot.autoconfigure.SharedMetadataReaderFactoryContextInitializer
+
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.yst.app.conf.testSpringFactoryConfigruation,\
+  com.yst.app.conf.configBean.initializerTest
+
