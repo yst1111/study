@@ -17,7 +17,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration(proxyBeanMethods = false) //proxyBeanMethods 是否添加代理
 @PropertySource("application.properties")
 //@EnableConfigurationProperties(MyProperties.class) //也可注入
-@ConfigurationPropertiesScan("com.xxx.properties")//将这个配置文件包下的所有配置文件注入
+//@ConfigurationPropertiesScan("com.xxx.properties")//将这个配置文件包下的所有配置文件注入
 public class testConfig {
     @Value("${password}")
     public String password;
