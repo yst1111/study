@@ -18,5 +18,5 @@ spring:
       discovery:
         cluster-name: YST1 # 集群名称
 
-        #
+        #1
 
