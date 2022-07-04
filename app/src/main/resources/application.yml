@@ -29,5 +29,5 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 dog: ${user.name:ccc}
-        #1
+        #1 1
 
