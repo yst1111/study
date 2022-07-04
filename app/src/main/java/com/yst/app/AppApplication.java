@@ -38,7 +38,8 @@ public class AppApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(AppApplication.class, args);
-//        DataSource dataSource = applicationContext.getBean(DataSource.class);
+
+        //        DataSource dataSource = applicationContext.getBean(DataSource.class);
 //        System.out.println(dataSource);//测试@Bean 注入的datasource
 //        System.out.println(applicationContext.getBean(testConfig.class));//测试配置类注入的无注解类
 //        System.out.println(applicationContext.getBean(testSpringFactoryConfigruation.class));//测试spring.factories文件注入的condiguration
@@ -53,6 +54,7 @@ public class AppApplication {
             logg.info("------  Application start success！  ------");
         }
     }
+
     @Bean
     public DataSource dataSource(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();

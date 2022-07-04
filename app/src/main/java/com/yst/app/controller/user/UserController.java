@@ -1,11 +1,13 @@
 package com.yst.app.controller.user;
 
+import cn.hutool.core.lang.Console;
 import com.yst.entity.dto.StudentDto;
 import com.yst.entity.pojo.Student;
 import com.yst.fira.repo.user.IUserRespository;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,10 +28,13 @@ public class UserController {
 
     @Autowired(required = false)
     private IUserRespository iUserRespository;
+    @Value("${dog}")
+    private String name;
 
     @PostMapping(value = "/excel")
     @ApiOperation(value = "excel")
     public List excel(@RequestParam(value = "excelFile") MultipartFile file) throws IOException {
+        Console.log(name);
         return iUserRespository.importExcel(file);
     }
 

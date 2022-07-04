@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -28,7 +29,9 @@ public class testConfig {
 
     //有一个没有任何注释的类,可用通过配置类将其注入容器
     @Bean
+    @Profile("dev")//指定dev环境生效
     public configBeanTest testImpotBean(){
         return new configBeanTest();
     }
+
 }

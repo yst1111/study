@@ -24,7 +24,7 @@ import cn.hutool.core.io.IoUtil;
 import static cn.hutool.poi.excel.ExcelUtil.getReader;
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
 
-//@SpringBootTest
+@SpringBootTest
 class AppApplicationTests {
 
     @Value("password")
@@ -214,6 +214,13 @@ class AppApplicationTests {
         student.setCountry("213");
         StudentDto studentDto = demoAsb.poToDto(student);
         Console.log(studentDto);
+    }
+
+    @Value("${password}")
+    private String name;
+    @Test
+    void ymlTest(){
+        System.out.println(name);
     }
 
 }

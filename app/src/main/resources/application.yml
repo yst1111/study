@@ -4,6 +4,8 @@ server:
     threads:
       max: 500
 spring:
+  profiles:
+    active: dev  # profiles.active: 指定目前所处环境,用这个可以切换环境,从而使不同配置生效
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://192.168.41.188:3306/test411?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
@@ -17,4 +19,13 @@ spring:
       server-addr: localhost:8848
       discovery:
         cluster-name: YST1 # 集群名称
+#        register-enabled: off
+  banner:
+    image:
+      location: 4964d0409f11cbf4283a1f26f79093d2.jpeg
+#日志级别设置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+dog: ${user.name:ccc}
