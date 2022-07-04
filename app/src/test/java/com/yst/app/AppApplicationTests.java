@@ -1,12 +1,16 @@
 package com.yst.app;
 
+import cn.hutool.core.lang.Console;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.yst.app.controller.assember.DemoAsb;
 import com.yst.entity.domain.CompanyDTO;
+import com.yst.entity.dto.StudentDto;
 import com.yst.entity.pojo.Student;
 import com.yst.fira.dto.StudentMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -22,6 +26,15 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.cn;
 
 //@SpringBootTest
 class AppApplicationTests {
+
+    @Value("password")
+    public String password;
+
+    @Test
+    void test() {
+        System.out.println(password);
+    }
+
 
     @Autowired
     StudentMapper studentMapper;
@@ -122,13 +135,7 @@ class AppApplicationTests {
     }
 
 
-
-
-
-
-
-
-        @Test
+    @Test
     void testSelectUser() {
         List<String> list = new ArrayList<>();
         List<String> list1 = new ArrayList<>();
@@ -193,4 +200,20 @@ class AppApplicationTests {
 //        System.out.println(collect1);
 
     }
+
+    @Autowired
+    private DemoAsb demoAsb;
+    @Test
+    void test4(){
+        Student student = new Student();
+        student.setId("81");
+        student.setName("yst");
+        student.setAge(12);
+        student.setLike("篮球");
+        student.setLikes("足球⚽");
+        student.setCountry("213");
+        StudentDto studentDto = demoAsb.poToDto(student);
+        Console.log(studentDto);
+    }
+
 }

@@ -21,7 +21,7 @@ import java.util.List;
 @Api(tags = "用户页面")
 @RestController
 @RequestMapping(value = "user")
-@ComponentScan({"com.yst.fira.repo"})
+@ComponentScan({"com.yst.fira.repo","com.yst.entity.dto"})
 public class UserController {
 
     @Autowired(required = false)

@@ -10,4 +10,11 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: app_controller_provider
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        cluster-name: YST1 # 集群名称
 
