@@ -41,6 +41,7 @@ public class UserController {
     @GetMapping(value = "/hello")
     @ApiOperation(value = "根据id查student的所有信息")
     public List hello(Student dto){
+        int i = 1/0;
         List list = iUserRespository.selectUser(dto);
         return list;
     }
